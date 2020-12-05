@@ -1,3 +1,4 @@
+// Package sm3 is implemented based on GB/T 32905-2016.
 package sm3
 
 import (
