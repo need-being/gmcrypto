@@ -1,5 +1,5 @@
 # gmcrypto
-Golang crypto library by Chinese National Standard
+Golang crypto library based on Chinese National Standard
 
 ## SM3 - Cryptographic Hash Algorithm
 The algorithm is defined by GB/T 32905-2016.
@@ -12,10 +12,10 @@ The `gmcrypto/sm3` package implements
 This implementation:
 | Content Size | Speed        | Throughput | Memory Usage | Memory Alloc |
 | ------------ | ------------ | ---------- | ------------ | ------------ |
-| 8 Bytes      | 1350 ns/op   | 5.92 MB/s  | 176 B/op     | 2 allocs/op  |
-| 320 Bytes    | 6433 ns/op   | 49.74 MB/s | 176 B/op     | 2 allocs/op  |
-| 1 KiB        | 17610 ns/op  | 58.15 MB/s | 176 B/op     | 2 allocs/op  |
-| 8 KiB        | 131205 ns/op | 62.44 MB/s | 176 B/op     | 2 allocs/op  |
+| 8 Bytes      | 1212 ns/op   | 6.60 MB/s  | 176 B/op     | 2 allocs/op  |
+| 320 Bytes    | 6009 ns/op   | 53.26 MB/s | 176 B/op     | 2 allocs/op  |
+| 1 KiB        | 16392 ns/op  | 62.47 MB/s | 176 B/op     | 2 allocs/op  |
+| 8 KiB        | 122731 ns/op | 66.75 MB/s | 176 B/op     | 2 allocs/op  |
 
 Other implementation: [github.com/tjfoc/gmsm/sm3](https://github.com/tjfoc/gmsm)
 | Content Size | Speed        | Throughput | Memory Usage | Memory Alloc |
