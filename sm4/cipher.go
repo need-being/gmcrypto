@@ -23,7 +23,7 @@ type sm4Cipher struct {
 
 // NewCipher creates and returns a new cipher.Block.
 func NewCipher(key []byte) (cipher.Block, error) {
-	if len(key) != 8 {
+	if len(key) != 16 {
 		return nil, KeySizeError(len(key))
 	}
 
