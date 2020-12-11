@@ -16,8 +16,35 @@ func f1(a uint32) uint32 {
 	return sBox4[b[0]] ^ sBox5[b[1]] ^ sBox6[b[2]] ^ sBox7[b[3]] ^ 0
 }
 
-func cryptBlock(subkeys []uint32, dst, src []byte, decrypt bool) {
-	panic("not implemented")
+func cryptBlock(rk []uint32, dst, src []byte, decrypt bool) {
+	x := [4]uint32{
+		binary.BigEndian.Uint32(src),
+		binary.BigEndian.Uint32(src[4:]),
+		binary.BigEndian.Uint32(src[8:]),
+		binary.BigEndian.Uint32(src[12:]),
+	}
+
+	if decrypt {
+		for i := 31; i > 0; i -= 4 {
+			x[0] ^= f0(x[1] ^ x[2] ^ x[3] ^ rk[i])
+			x[1] ^= f0(x[2] ^ x[3] ^ x[0] ^ rk[i-1])
+			x[2] ^= f0(x[3] ^ x[0] ^ x[1] ^ rk[i-2])
+			x[3] ^= f0(x[0] ^ x[1] ^ x[2] ^ rk[i-3])
+
+		}
+	} else {
+		for i := 0; i < 31; i += 4 {
+			x[0] ^= f0(x[1] ^ x[2] ^ x[3] ^ rk[i])
+			x[1] ^= f0(x[2] ^ x[3] ^ x[0] ^ rk[i+1])
+			x[2] ^= f0(x[3] ^ x[0] ^ x[1] ^ rk[i+2])
+			x[3] ^= f0(x[0] ^ x[1] ^ x[2] ^ rk[i+3])
+		}
+	}
+
+	binary.BigEndian.PutUint32(dst, x[3])
+	binary.BigEndian.PutUint32(dst[4:], x[2])
+	binary.BigEndian.PutUint32(dst[8:], x[1])
+	binary.BigEndian.PutUint32(dst[12:], x[0])
 }
 
 // Encrypt one block from src into dst, using the subkeys.
