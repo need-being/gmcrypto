@@ -59,15 +59,18 @@ func decryptBlock(subkeys []uint32, dst, src []byte) {
 
 // creates 16 56-bit subkeys from the original key
 func (c *sm4Cipher) generateSubkeys(keyBytes []byte) {
-	var k [36]uint32
-
-	k[0] = binary.BigEndian.Uint32(keyBytes) ^ fk0
-	k[1] = binary.BigEndian.Uint32(keyBytes[4:]) ^ fk1
-	k[2] = binary.BigEndian.Uint32(keyBytes[8:]) ^ fk2
-	k[3] = binary.BigEndian.Uint32(keyBytes[12:]) ^ fk3
-
-	for i := 0; i < 32; i++ {
-		k[i+4] = k[i] ^ f1(k[i+1]^k[i+2]^k[i+3]^ck[i])
+	k := [4]uint32{
+		binary.BigEndian.Uint32(keyBytes) ^ fk0,
+		binary.BigEndian.Uint32(keyBytes[4:]) ^ fk1,
+		binary.BigEndian.Uint32(keyBytes[8:]) ^ fk2,
+		binary.BigEndian.Uint32(keyBytes[12:]) ^ fk3,
 	}
-	copy(c.subkeys[:], k[4:])
+
+	for i := 0; i < 32; i += 4 {
+		k[0] ^= f1(k[1] ^ k[2] ^ k[3] ^ ck[i])
+		k[1] ^= f1(k[2] ^ k[3] ^ k[0] ^ ck[i+1])
+		k[2] ^= f1(k[3] ^ k[0] ^ k[1] ^ ck[i+2])
+		k[3] ^= f1(k[0] ^ k[1] ^ k[2] ^ ck[i+3])
+		copy(c.subkeys[i:], k[:])
+	}
 }
