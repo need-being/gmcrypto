@@ -5,8 +5,8 @@ Golang crypto library based on Chinese National Standard
 The algorithm is defined by GB/T 32905-2016.
 
 The `gmcrypto/sm3` package implements
-- [hash.Hash](https://golang.org/pkg/hash/#Hash), which can be further used in HMAC or KDF.
-- [encoding.BinaryMarshaler](https://golang.org/pkg/encoding/#BinaryMarshaler) and [encoding.BinaryUnmarshaler](https://golang.org/pkg/encoding/#BinaryUnmarshaler), which implies that this SM3 implementation is **resumable**, and its state can be encoded to or decoded from a JSON object.
+- [hash.Hash](https://pkg.go.dev/hash#Hash), which can be further used in HMAC or KDF.
+- [encoding.BinaryMarshaler](https://pkg.go.dev/encoding/#BinaryMarshaler) and [encoding.BinaryUnmarshaler](https://pkg.go.dev/encoding/#BinaryUnmarshaler), which implies that this SM3 implementation is **resumable**, and its state can be encoded to or decoded from a JSON object.
 
 ### Performance
 This implementation:
@@ -29,7 +29,7 @@ Other implementation: [github.com/tjfoc/gmsm/sm3](https://github.com/tjfoc/gmsm)
 The algorithm is defined by GB/T 32907-2016.
 
 The `gmcrypto/sm4` package implements
-- [crypto/cipher.Block](https://golang.org/pkg/crypto/cipher/#Block), which can be further used in GCM, CBC, CFB, CTR, OFB, and many other block cipher modes.
+- [crypto/cipher.Block](https://pkg.go.dev/crypto/cipher/#Block), which can be further used in GCM, CBC, CFB, CTR, OFB, and many other block cipher modes.
 
 ### Performance
 This implementation:
