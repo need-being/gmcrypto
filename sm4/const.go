@@ -1,7 +1,7 @@
 package sm4
 
 // 8 optimized S-boxes used in the SM4 cipher function and key expension
-// The S-Boxes are generated using the original S-Box by `internal/sm4sbox`
+// The S-Boxes are generated using the original S-Box by `internal/sbox`
 var sBox0 = [256]uint32{
 	0x8ed55b5b, 0xd0924242, 0x4deaa7a7, 0x06fdfbfb, 0xfccf3333, 0x65e28787, 0xc93df4f4, 0x6bb5dede, 0x4e165858, 0x6eb4dada, 0x44145050, 0xcac10b0b, 0x8828a0a0, 0x17f8efef, 0x9c2cb0b0, 0x11051414,
 	0x872bacac, 0xfb669d9d, 0xf2986a6a, 0xae77d9d9, 0x822aa8a8, 0x46bcfafa, 0x14041010, 0xcfc00f0f, 0x02a8aaaa, 0x54451111, 0x5f134c4c, 0xbe269898, 0x6d482525, 0x9e841a1a, 0x1e061818, 0xfd9b6666,
