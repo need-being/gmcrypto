@@ -112,5 +112,5 @@ func (curve *curve) ScalarMult(x1 *big.Int, y1 *big.Int, k []byte) (x *big.Int, 
 // ScalarBaseMult returns k*G, where G is the base point of the group
 // and k is an integer in big-endian form.
 func (curve *curve) ScalarBaseMult(k []byte) (x *big.Int, y *big.Int) {
-	panic("not implemented") // TODO: Implement
+	return curve.ScalarMult(curve.Gx, curve.Gy, k)
 }
