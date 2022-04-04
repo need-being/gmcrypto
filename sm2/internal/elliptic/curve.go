@@ -69,7 +69,29 @@ func (curve *curve) Params() *elliptic.CurveParams {
 
 // IsOnCurve reports whether the given (x,y) lies on the curve.
 func (curve *curve) IsOnCurve(x *big.Int, y *big.Int) bool {
-	panic("not implemented") // TODO: Implement
+	if x.Sign() < 0 || x.Cmp(curve.P) >= 0 || y.Sign() < 0 || y.Cmp(curve.P) >= 0 {
+		return false
+	}
+
+	// SM2 polynomial: y² = x³ + ax + b
+	y2 := new(big.Int).Mul(y, y)
+	y2.Mod(y2, curve.P)
+
+	return curve.polynomial(x).Cmp(y2) == 0
+}
+
+// polynomial returns x³ + ax + b.
+func (curve *curve) polynomial(x *big.Int) *big.Int {
+	// x³ + ax + b = (x² + a)x + b
+	res := new(big.Int).Mul(x, x)
+	res.Add(res, curve.A)
+	res.Mod(res, curve.P)
+
+	res.Mul(res, x)
+	res.Add(res, curve.B)
+	res.Mod(res, curve.P)
+
+	return res
 }
 
 // Add returns the sum of (x1,y1) and (x2,y2)
