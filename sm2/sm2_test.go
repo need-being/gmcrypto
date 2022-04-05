@@ -328,3 +328,64 @@ func TestVerify(t *testing.T) {
 		})
 	}
 }
+
+func BenchmarkSign(b *testing.B) {
+	priv, err := GenerateKey(Curve(), rand.Reader)
+	if err != nil {
+		b.Fatal("GenerateKey:", err)
+	}
+	priv.ID = []byte("benchmark")
+	message := []byte("message")
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, err = Sign(rand.Reader, priv, message)
+		if err != nil {
+			b.Fatal("Sign:", err)
+		}
+	}
+}
+
+func BenchmarkVerify(b *testing.B) {
+	priv, err := GenerateKey(Curve(), rand.Reader)
+	if err != nil {
+		b.Fatal("GenerateKey:", err)
+	}
+	priv.ID = []byte("benchmark")
+	message := []byte("message")
+	sig, err := Sign(rand.Reader, priv, message)
+	if err != nil {
+		b.Fatal("Sign:", err)
+	}
+	pub := &priv.PublicKey
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		if !Verify(pub, message, sig) {
+			b.Fatal("Verify failed")
+		}
+	}
+}
+
+func BenchmarkVerifyFailed(b *testing.B) {
+	priv, err := GenerateKey(Curve(), rand.Reader)
+	if err != nil {
+		b.Fatal("GenerateKey:", err)
+	}
+	priv.ID = []byte("benchmark")
+	message := []byte("message")
+	sig, err := Sign(rand.Reader, priv, message)
+	if err != nil {
+		b.Fatal("Sign:", err)
+	}
+	pub := &priv.PublicKey
+
+	// tamper message
+	message = []byte("malicious")
+
+	// benchmark
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		if Verify(pub, message, sig) {
+			b.Fatal("Verify should faile")
+		}
+	}
+}
