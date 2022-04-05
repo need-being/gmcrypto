@@ -22,6 +22,14 @@ This implementation: Intel(R) Core(TM) i7-7700K CPU @ 4.20GHz
 | Verify       | 3211443 ns/op | 1724630 B/op  | 18393 allocs/op |
 | VerifyFailed | 3149854 ns/op | 1695985 B/op  | 18101 allocs/op |
 
+This implementation with elliptic curve implementation [github.com/tjfoc/gmsm/sm2.P256Sm2](https://pkg.go.dev/github.com/tjfoc/gmsm/sm2#P256Sm2):
+
+| Operation    | Speed         | Allocated Mem | Mem Allocs     |
+| ------------ | ------------- | ------------- | -------------- |
+| Sign         | 249129 ns/op  | 4021 B/op     | 73 allocs/op   |
+| Verify       | 1389493 ns/op | 82216 B/op    | 1679 allocs/op |
+| VerifyFailed | 1353205 ns/op | 77877 B/op    | 1593 allocs/op |
+
 Other implementation: [github.com/tjfoc/gmsm/sm2](https://github.com/tjfoc/gmsm)
 
 | Operation    | Speed         | Allocated Mem | Mem Allocs     |
