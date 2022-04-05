@@ -5,14 +5,37 @@ package sm2
 import (
 	"crypto"
 	"crypto/elliptic"
+	"errors"
 	"io"
 	"math/big"
+
+	"github.com/need-being/gmcrypto/sm2/internal/convert"
+	"github.com/need-being/gmcrypto/sm3"
+)
+
+// precomputed big integers.
+var (
+	one   = new(big.Int).SetInt64(1)
+	two   = new(big.Int).SetInt64(2)
+	three = new(big.Int).SetInt64(3)
 )
 
 // PublicKey represents an SM2 public key.
 type PublicKey struct {
 	elliptic.Curve
 	X, Y *big.Int
+
+	// ID is the identifier of the signer.
+	// The max size of an ID is 65,535 bytes.
+	//
+	// ID is not a part of the public key defined in GB/T 32918.2-2016.
+	// Since it is commonly a good practice to use one key pair per identity,
+	// it makes more sense to bind the ID with the public key.
+	// In the scenario that a key pair is associated with multiple identities,
+	// multiple instances of PublicKey or PrivateKey should be created for each
+	// identity with other fields remaining the same.
+	// This also enables SM2 to support crypto.Signer.
+	ID []byte
 }
 
 // Equal reports whether pub and x have the same value.
@@ -23,6 +46,56 @@ func (pub *PublicKey) Equal(x crypto.PublicKey) bool {
 	}
 	// check curve pointers only since SM2 curve is a singleton.
 	return pub.Curve == xx.Curve && pub.X.Cmp(xx.X) == 0 && pub.Y.Cmp(xx.Y) == 0
+}
+
+// Digest returns the value Z defined in GB/T 32918.2-2016 by hashing.
+// SM3 is used for hash algorithm.
+func (pub *PublicKey) Digest() ([]byte, error) {
+	idLength := len(pub.ID)
+	if idLength > 0xffff {
+		return nil, errors.New("sm2: ID too large")
+	}
+
+	// Z = H( len(ID) || ID || a || b || Gx || Gy || X || Y )
+	h := sm3.New() // write on sm3 never returns error
+
+	// write ID
+	h.Write([]byte{byte(idLength >> 8), byte(idLength)})
+	h.Write(pub.ID)
+
+	// write curve
+	params := pub.Curve.Params()
+	buf := make([]byte, (params.BitSize+7)/8)
+
+	a := new(big.Int).Sub(params.P, three)
+	if err := convert.FieldToBytes(a, params.P, buf); err != nil {
+		return nil, err
+	}
+	h.Write(buf)
+	if err := convert.FieldToBytes(params.B, params.P, buf); err != nil {
+		return nil, err
+	}
+	h.Write(buf)
+	if err := convert.FieldToBytes(params.Gx, params.P, buf); err != nil {
+		return nil, err
+	}
+	h.Write(buf)
+	if err := convert.FieldToBytes(params.Gy, params.P, buf); err != nil {
+		return nil, err
+	}
+	h.Write(buf)
+
+	// write public key
+	if err := convert.FieldToBytes(pub.X, params.P, buf); err != nil {
+		return nil, err
+	}
+	h.Write(buf)
+	if err := convert.FieldToBytes(pub.Y, params.P, buf); err != nil {
+		return nil, err
+	}
+	h.Write(buf)
+
+	return h.Sum(nil), nil
 }
 
 // PrivateKey represents an ECDSA private key.
@@ -44,12 +117,6 @@ func (priv *PrivateKey) Equal(x crypto.PrivateKey) bool {
 	}
 	return priv.PublicKey.Equal(&xx.PublicKey) && priv.D.Cmp(xx.D) == 0
 }
-
-// precomputed big integers.
-var (
-	one = new(big.Int).SetInt64(1)
-	two = new(big.Int).SetInt64(2)
-)
 
 // GenerateKey generates a public and private key pair.
 func GenerateKey(c elliptic.Curve, rand io.Reader) (*PrivateKey, error) {
