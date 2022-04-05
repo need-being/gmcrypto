@@ -51,7 +51,7 @@ func (pub *PublicKey) Equal(x crypto.PublicKey) bool {
 // Digest returns the value Z defined in GB/T 32918.2-2016 by hashing.
 // SM3 is used for hash algorithm.
 func (pub *PublicKey) Digest() ([]byte, error) {
-	idLength := len(pub.ID)
+	idLength := len(pub.ID) << 3
 	if idLength > 0xffff {
 		return nil, errors.New("sm2: ID too large")
 	}
@@ -123,8 +123,7 @@ func GenerateKey(c elliptic.Curve, rand io.Reader) (*PrivateKey, error) {
 	// generate d in [1, n-2].
 	params := c.Params()
 	b := make([]byte, params.BitSize/8+8) // 64 more bits to reduce bias from mod.
-	_, err := io.ReadFull(rand, b)
-	if err != nil {
+	if _, err := io.ReadFull(rand, b); err != nil {
 		return nil, err
 	}
 	d := new(big.Int).SetBytes(b)
@@ -144,4 +143,69 @@ func GenerateKey(c elliptic.Curve, rand io.Reader) (*PrivateKey, error) {
 		},
 		D: d,
 	}, nil
+}
+
+// Sign signs the message with a private key and returns a signature.
+// The signature is in the form of (r, s) where r and s have the same length.
+// SM3 is used for hash algorithm.
+func Sign(rand io.Reader, priv *PrivateKey, message []byte) ([]byte, error) {
+	// A1, A2: compute hash value e.
+	z, err := priv.Digest()
+	if err != nil {
+		return nil, err
+	}
+	h := sm3.New() // write on sm3 never returns error
+	h.Write(z)
+	h.Write(message)
+	e := convert.BytesToInteger(h.Sum(nil))
+
+	// A3: generate random k
+	params := priv.Curve.Params()
+	r := new(big.Int)
+	s := new(big.Int)
+	for {
+		b := make([]byte, params.BitSize/8+8) // 64 more bits to reduce bias from mod.
+		if _, err = io.ReadFull(rand, b); err != nil {
+			return nil, err
+		}
+		k := new(big.Int).SetBytes(b)
+		n := new(big.Int).Sub(params.N, one)
+		k.Mod(k, n)
+		k.Add(k, one)
+
+		// A4: compute (x, y) = kG where y is not used.
+		x, _ := priv.Curve.ScalarBaseMult(k.Bytes())
+
+		// A5: compute r = (e + x) mod n
+		r.Add(e, x)
+		r.Mod(r, params.N)
+		if r.Sign() == 0 {
+			continue // goto A3
+		}
+		if t := new(big.Int).Add(r, k); t.Cmp(params.N) == 0 {
+			continue // goto A3
+		}
+
+		// A6: compute s = ((1 + d)^-1 * (k - rd)) mod n
+		s.Add(one, priv.D)
+		s.ModInverse(s, params.N)
+		s2 := new(big.Int).Mul(r, priv.D)
+		s2.Sub(k, s2)
+		s.Mul(s, s2)
+		s.Mod(s, params.N)
+		if s.Sign() != 0 {
+			break // goto A3
+		}
+	}
+
+	// A7: convert r, s to byte strings
+	n := (params.BitSize + 7) / 8
+	sig := make([]byte, n*2)
+	if err = convert.IntegerToBytes(r, sig[:n]); err != nil {
+		return nil, err
+	}
+	if err = convert.IntegerToBytes(s, sig[n:]); err != nil {
+		return nil, err
+	}
+	return sig, nil
 }
