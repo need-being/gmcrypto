@@ -98,7 +98,7 @@ func (pub *PublicKey) Digest() ([]byte, error) {
 	return h.Sum(nil), nil
 }
 
-// PrivateKey represents an ECDSA private key.
+// PrivateKey represents an SM2 private key.
 type PrivateKey struct {
 	PublicKey
 	D *big.Int
