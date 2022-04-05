@@ -22,6 +22,22 @@ This implementation: Intel(R) Core(TM) i7-7700K CPU @ 4.20GHz
 | Verify       | 3211443 ns/op | 1724630 B/op  | 18393 allocs/op |
 | VerifyFailed | 3149854 ns/op | 1695985 B/op  | 18101 allocs/op |
 
+This implementation with elliptic curve implementation [github.com/tjfoc/gmsm/sm2.P256Sm2](https://pkg.go.dev/github.com/tjfoc/gmsm/sm2#P256Sm2):
+
+| Operation    | Speed         | Allocated Mem | Mem Allocs     |
+| ------------ | ------------- | ------------- | -------------- |
+| Sign         | 249129 ns/op  | 4021 B/op     | 73 allocs/op   |
+| Verify       | 1389493 ns/op | 82216 B/op    | 1679 allocs/op |
+| VerifyFailed | 1353205 ns/op | 77877 B/op    | 1593 allocs/op |
+
+Other implementation: [github.com/tjfoc/gmsm/sm2](https://github.com/tjfoc/gmsm)
+
+| Operation    | Speed         | Allocated Mem | Mem Allocs     |
+| ------------ | ------------- | ------------- | -------------- |
+| Sign         | 276723 ns/op  | 4613 B/op     | 90 allocs/op   |
+| Verify       | 1503850 ns/op | 84577 B/op    | 1738 allocs/op |
+| VerifyFailed | 1522215 ns/op | 75034 B/op    | 1537 allocs/op |
+
 ## SM3 - Cryptographic Hash Algorithm
 
 The algorithm is defined by GB/T 32905-2016.
@@ -33,23 +49,23 @@ The `gmcrypto/sm3` package implements
 
 ### Performance
 
-This implementation:
+This implementation: Intel(R) Core(TM) i7-7700K CPU @ 4.20GHz
 
-| Content Size | Speed        | Throughput | Allocated Mem | Mem Allocs  |
-| ------------ | ------------ | ---------- | ------------- | ----------- |
-| 8 Bytes      | 1212 ns/op   | 6.60 MB/s  | 176 B/op      | 2 allocs/op |
-| 320 Bytes    | 6009 ns/op   | 53.26 MB/s | 176 B/op      | 2 allocs/op |
-| 1 KiB        | 16392 ns/op  | 62.47 MB/s | 176 B/op      | 2 allocs/op |
-| 8 KiB        | 122731 ns/op | 66.75 MB/s | 176 B/op      | 2 allocs/op |
+| Content Size | Speed       | Throughput  | Allocated Mem | Mem Allocs  |
+| ------------ | ----------- | ----------- | ------------- | ----------- |
+| 8 Bytes      | 453.5 ns/op | 17.64 MB/s  | 176 B/op      | 2 allocs/op |
+| 320 Bytes    | 2220 ns/op  | 144.11 MB/s | 176 B/op      | 2 allocs/op |
+| 1 KiB        | 6079 ns/op  | 168.44 MB/s | 176 B/op      | 2 allocs/op |
+| 8 KiB        | 45115 ns/op | 181.58 MB/s | 176 B/op      | 2 allocs/op |
 
 Other implementation: [github.com/tjfoc/gmsm/sm3](https://github.com/tjfoc/gmsm)
 
-| Content Size | Speed        | Throughput | Allocated Mem | Mem Allocs  |
-| ------------ | ------------ | ---------- | ------------- | ----------- |
-| 8 Bytes      | 1560 ns/op   | 5.13 MB/s  | 120 B/op      | 4 allocs/op |
-| 320 Bytes    | 7176 ns/op   | 44.59 MB/s | 440 B/op      | 5 allocs/op |
-| 1 KiB        | 19077 ns/op  | 53.68 MB/s | 1144 B/op     | 5 allocs/op |
-| 8 KiB        | 139148 ns/op | 58.87 MB/s | 8312 B/op     | 5 allocs/op |
+| Content Size | Speed       | Throughput  | Allocated Mem | Mem Allocs  |
+| ------------ | ----------- | ----------- | ------------- | ----------- |
+| 8 Bytes      | 711.6 ns/op | 11.24 MB/s  | 120 B/op      | 4 allocs/op |
+| 320 Bytes    | 3243 ns/op  | 98.66 MB/s  | 440 B/op      | 5 allocs/op |
+| 1 KiB        | 8393 ns/op  | 122.01 MB/s | 1144 B/op     | 5 allocs/op |
+| 8 KiB        | 62547 ns/op | 130.97 MB/s | 8312 B/op     | 5 allocs/op |
 
 ## SM4 - Block Cipher Algorithm
 
@@ -61,18 +77,18 @@ The `gmcrypto/sm4` package implements
 
 ### Performance
 
-This implementation:
+This implementation: Intel(R) Core(TM) i7-7700K CPU @ 4.20GHz
 
-| Operation | Speed     | Throughput | Allocated Mem | Mem Allocs  |
-| --------- | --------- | ---------- | ------------- | ----------- |
-| NewCipher | 473 ns/op | -          | 128 B/op      | 1 allocs/op |
-| Encrypt   | 347 ns/op | 46.06 MB/s | 0 B/op        | 0 allocs/op |
-| Decrypt   | 344 ns/op | 46.48 MB/s | 0 B/op        | 0 allocs/op |
+| Operation | Speed       | Throughput  | Allocated Mem | Mem Allocs  |
+| --------- | ----------- | ----------- | ------------- | ----------- |
+| NewCipher | 181.6 ns/op | -           | 128 B/op      | 1 allocs/op |
+| Encrypt   | 131.4 ns/op | 121.77 MB/s | 0 B/op        | 0 allocs/op |
+| Decrypt   | 134.4 ns/op | 119.08 MB/s | 0 B/op        | 0 allocs/op |
 
 Other implementation: [github.com/tjfoc/gmsm/sm4](https://github.com/tjfoc/gmsm)
 
-| Operation | Speed      | Throughput | Allocated Mem | Mem Allocs  |
-| --------- | ---------- | ---------- | ------------- | ----------- |
-| NewCipher | 1002 ns/op | -          | 240 B/op      | 4 allocs/op |
-| Encrypt   | 363 ns/op  | 44.05 MB/s | 0 B/op        | 0 allocs/op |
-| Decrypt   | 357 ns/op  | 44.78 MB/s | 0 B/op        | 0 allocs/op |
+| Operation | Speed       | Throughput  | Allocated Mem | Mem Allocs  |
+| --------- | ----------- | ----------- | ------------- | ----------- |
+| NewCipher | 324.8 ns/op | -           | 240 B/op      | 4 allocs/op |
+| Encrypt   | 146.4 ns/op | 109.32 MB/s | 0 B/op        | 0 allocs/op |
+| Decrypt   | 148.1 ns/op | 108.04 MB/s | 0 B/op        | 0 allocs/op |

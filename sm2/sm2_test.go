@@ -385,7 +385,7 @@ func BenchmarkVerifyFailed(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		if Verify(pub, message, sig) {
-			b.Fatal("Verify should faile")
+			b.Fatal("Verify should failed")
 		}
 	}
 }
