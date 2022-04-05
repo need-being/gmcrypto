@@ -39,7 +39,7 @@ var curve = &elliptic.CurveParams{
 		0x02, 0xdf, 0x32, 0xe5, 0x21, 0x39, 0xf0, 0xa0,
 	}),
 	BitSize: 256,
-	Name:    "SM2",
+	Name:    "SM2", // name from ISO 14888-3
 }
 
 // Curve returns an elliptic curve for SM2.
