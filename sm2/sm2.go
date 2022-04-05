@@ -118,6 +118,19 @@ func (priv *PrivateKey) Equal(x crypto.PrivateKey) bool {
 	return priv.PublicKey.Equal(&xx.PublicKey) && priv.D.Cmp(xx.D) == 0
 }
 
+// Sign signs the given message with priv.
+// SM2 relies on hash over message and the identity of the signer, and therefore
+// cannot handle pre-hashed messages. Thus opts.HashFunc() must return zero to
+// indicate the message hasn't been hashed if opts presents. This can be
+// achieved by passing crypto.Hash(0) as the value for opts.
+func (priv *PrivateKey) Sign(rand io.Reader, message []byte, opts crypto.SignerOpts) (signature []byte, err error) {
+	if opts != nil && opts.HashFunc() != crypto.Hash(0) {
+		return nil, errors.New("sm2: cannot sign hashed message")
+	}
+
+	return Sign(rand, priv, message)
+}
+
 // GenerateKey generates a public and private key pair.
 func GenerateKey(c elliptic.Curve, rand io.Reader) (*PrivateKey, error) {
 	// generate d in [1, n-2].
