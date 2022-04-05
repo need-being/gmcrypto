@@ -45,7 +45,36 @@ func (priv *PrivateKey) Equal(x crypto.PrivateKey) bool {
 	return priv.PublicKey.Equal(&xx.PublicKey) && priv.D.Cmp(xx.D) == 0
 }
 
+// precomputed big integers.
+var (
+	one = new(big.Int).SetInt64(1)
+	two = new(big.Int).SetInt64(2)
+)
+
 // GenerateKey generates a public and private key pair.
 func GenerateKey(c elliptic.Curve, rand io.Reader) (*PrivateKey, error) {
-	panic("not implemented")
+	// generate d in [1, n-2].
+	params := c.Params()
+	b := make([]byte, params.BitSize/8+8) // 64 more bits to reduce bias from mod.
+	_, err := io.ReadFull(rand, b)
+	if err != nil {
+		return nil, err
+	}
+	d := new(big.Int).SetBytes(b)
+	n := new(big.Int).Sub(params.N, two)
+	d.Mod(d, n)
+	d.Add(d, one)
+
+	// compute public key
+	x, y := c.ScalarBaseMult(d.Bytes())
+
+	// pack private key
+	return &PrivateKey{
+		PublicKey: PublicKey{
+			Curve: c,
+			X:     x,
+			Y:     y,
+		},
+		D: d,
+	}, nil
 }
