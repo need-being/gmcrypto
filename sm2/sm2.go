@@ -149,7 +149,7 @@ func GenerateKey(c elliptic.Curve, rand io.Reader) (*PrivateKey, error) {
 // The signature is in the form of (r, s) where r and s have the same length.
 // SM3 is used for hash algorithm.
 func Sign(rand io.Reader, priv *PrivateKey, message []byte) ([]byte, error) {
-	// A1, A2: compute hash value e.
+	// A1, A2: compute hash value e
 	z, err := priv.Digest()
 	if err != nil {
 		return nil, err
@@ -173,7 +173,7 @@ func Sign(rand io.Reader, priv *PrivateKey, message []byte) ([]byte, error) {
 		k.Mod(k, n)
 		k.Add(k, one)
 
-		// A4: compute (x, y) = kG where y is not used.
+		// A4: compute (x, y) = kG where y is dropped
 		x, _ := priv.Curve.ScalarBaseMult(k.Bytes())
 
 		// A5: compute r = (e + x) mod n
@@ -208,4 +208,55 @@ func Sign(rand io.Reader, priv *PrivateKey, message []byte) ([]byte, error) {
 		return nil, err
 	}
 	return sig, nil
+}
+
+// Verify reports whether sig is a valid signature of message by the given
+// public key.
+func Verify(pub *PublicKey, message, sig []byte) bool {
+	// parse (r, s)
+	params := pub.Curve.Params()
+	n := (params.BitSize + 7) / 8
+	if len(sig) != n*2 {
+		return false
+	}
+	r := convert.BytesToInteger(sig[:n])
+	s := convert.BytesToInteger(sig[n:])
+
+	// B1: check r in [1, n-1]
+	if r.Sign() == 0 || r.Cmp(params.N) >= 0 {
+		return false
+	}
+
+	// B2: check s in [1, n-1]
+	if s.Sign() == 0 || s.Cmp(params.N) >= 0 {
+		return false
+	}
+
+	// B3, B4: compute hash value e.
+	z, err := pub.Digest()
+	if err != nil {
+		return false
+	}
+	h := sm3.New() // write on sm3 never returns error
+	h.Write(z)
+	h.Write(message)
+	e := convert.BytesToInteger(h.Sum(nil))
+
+	// B5: compute t = (r + s) mod n
+	t := new(big.Int).Add(r, s)
+	t.Mod(t, params.N)
+	if t.Sign() == 0 {
+		return false
+	}
+
+	// B6: compute (x, y) = sG + tP where y is dropped
+	x, y := pub.Curve.ScalarBaseMult(s.Bytes())
+	x2, y2 := pub.Curve.ScalarMult(pub.X, pub.Y, t.Bytes())
+	x, _ = pub.Curve.Add(x, y, x2, y2)
+
+	// B7: compute R = (e + x) mod n
+	rr := new(big.Int).Add(e, x)
+	rr.Mod(rr, params.N)
+
+	return rr.Cmp(r) == 0
 }
