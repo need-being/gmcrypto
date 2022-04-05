@@ -1,6 +1,5 @@
 # gmcrypto
 
-![CI Test](https://github.com/need-being/gmcrypto/actions/workflows/test.yml/badge.svg)
 [![Go Reference](https://pkg.go.dev/badge/github.com/need-being/gmcrypto.svg)](https://pkg.go.dev/github.com/need-being/gmcrypto)
 
 Golang crypto library based on Chinese National Standard
