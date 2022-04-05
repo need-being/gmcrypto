@@ -1,8 +1,6 @@
 package sm4
 
-import (
-	"testing"
-)
+import "testing"
 
 type cryptTest struct {
 	key []byte
