@@ -10,7 +10,7 @@ func IntegerToBytes(x *big.Int, buf []byte) error {
 	if x.Sign() < 0 {
 		return errors.New("negative integer")
 	}
-	if len(x.Bits()) > len(buf) {
+	if x.BitLen() > len(buf)*8 {
 		return errors.New("integer too large")
 	}
 	x.FillBytes(buf)
@@ -30,7 +30,7 @@ func FieldToBytes(x, q *big.Int, buf []byte) error {
 	if x.Cmp(q) >= 0 {
 		return errors.New("integer not in the field")
 	}
-	if len(q.Bits()) > len(buf) {
+	if q.BitLen() > len(buf)*8 {
 		return errors.New("buffer too small")
 	}
 	x.FillBytes(buf)
